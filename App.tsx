@@ -11,9 +11,11 @@ import {StatusBar, useColorScheme, View} from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import HomeScreen from './app/pages/HomeScreen';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import MapScreen from './app/pages/MapScreen';
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+  // const [isMapDisplayed, setIsMapDisplayed] = React.useState(false);
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -30,7 +32,7 @@ function App(): JSX.Element {
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <HomeScreen />
+          <MapScreen />
         </View>
       </>
     </SafeAreaView>

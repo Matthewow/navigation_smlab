@@ -26,7 +26,7 @@ const HomeScreen = () => (
 
 const styles = StyleSheet.create({
   container: {
-    height: 900,
+    height: '100%',
     justifyContent: 'space-between',
   },
   image: {
