@@ -15,7 +15,7 @@ import MapScreen from './app/pages/MapScreen';
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
-  // const [isMapDisplayed, setIsMapDisplayed] = React.useState(false);
+  const [isMapDisplayed, setIsMapDisplayed] = React.useState(false);
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -32,7 +32,11 @@ function App(): JSX.Element {
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <MapScreen />
+          {isMapDisplayed ? (
+            <MapScreen />
+          ) : (
+            <HomeScreen setIsMapDisplayed={setIsMapDisplayed} />
+          )}
         </View>
       </>
     </SafeAreaView>
