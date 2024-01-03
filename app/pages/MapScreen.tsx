@@ -1,10 +1,27 @@
 import React, {useEffect} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View, PermissionsAndroid} from 'react-native';
 import Mapbox from '@rnmapbox/maps';
 import MapboxGL from '@rnmapbox/maps';
 import {navigationPost} from './utils/http';
 import {TouchableOpacity} from 'react-native';
-import {Image} from '@rneui/base';
+
+async function requestLocationPermission() {
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    );
+
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('Location permission granted');
+      // Now you can use the location services
+    } else {
+      console.log('Location permission denied');
+      // Handle the case when the user denies the permission
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+}
 
 Mapbox.setAccessToken(
   'pk.eyJ1IjoibWF0dGp3YW5nIiwiYSI6ImNsaXB5NDN1cTAzMnAza28xaG54ZWRrMzgifQ.cUju1vqjuW7XmAuO2iEZmg',
@@ -16,14 +33,7 @@ const hongKongCenter = {
 };
 
 const MapScreen = () => {
-  const [lineString, setLineString] = React.useState({
-    type: 'Feature',
-    properties: {},
-    geometry: {
-      type: 'LineString',
-      coordinates: [],
-    },
-  });
+  const [lineString, setLineString] = React.useState(undefined);
 
   const [currentLocation, setCurrentLocation] = React.useState([
     hongKongCenter.lng,
@@ -46,6 +56,7 @@ const MapScreen = () => {
   };
 
   useEffect(() => {
+    requestLocationPermission();
     refreshRoute();
   }, []);
 
@@ -59,17 +70,19 @@ const MapScreen = () => {
             animationMode={'flyTo'}
             animationDuration={10}
           />
-          <MapboxGL.ShapeSource id="line1" shape={lineString}>
-            <MapboxGL.LineLayer
-              id="linelayer1"
-              style={{lineWidth: 5, lineColor: '#477bd6'}}
-            />
-          </MapboxGL.ShapeSource>
-          <MapboxGL.PointAnnotation
-            id="default-marker"
-            coordinate={currentLocation}>
-            <View style={styles.markerImage} />
-          </MapboxGL.PointAnnotation>
+          <MapboxGL.UserLocation
+            androidRenderMode="compass"
+            animated={true}
+            showsUserHeadingIndicator={true}
+          />
+          {lineString ? (
+            <MapboxGL.ShapeSource id="line1" shape={lineString}>
+              <MapboxGL.LineLayer
+                id="linelayer1"
+                style={{lineWidth: 5, lineColor: '#477bd6'}}
+              />
+            </MapboxGL.ShapeSource>
+          ) : null}
         </MapboxGL.MapView>
         <TouchableOpacity
           style={styles.button}

@@ -2,7 +2,7 @@ import {Button} from '@rneui/themed';
 import React from 'react';
 import {StyleSheet, Text, View, ImageBackground} from 'react-native';
 
-const HomeScreen = () => (
+const HomeScreen = props => (
   <View style={styles.container}>
     <ImageBackground
       source={require('../assets/home-background-image.jpg')}
@@ -16,7 +16,7 @@ const HomeScreen = () => (
             color="#2b406e"
             radius="10"
             title="Get Started"
-            onPress={() => console.log('Get Started Pressed')}
+            onPress={() => props.setIsMapDisplayed(true)}
           />
         </View>
       </View>
