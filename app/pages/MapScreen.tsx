@@ -4,6 +4,7 @@ import Mapbox from '@rnmapbox/maps';
 import MapboxGL from '@rnmapbox/maps';
 import {navigationPost} from './utils/http';
 import {TouchableOpacity} from 'react-native';
+import Geolocation from '@react-native-community/geolocation';
 
 async function requestLocationPermission() {
   try {
@@ -39,6 +40,7 @@ const MapScreen = () => {
     hongKongCenter.lng,
     hongKongCenter.lat,
   ]);
+  const [currentZoomLevel, setCurrentZoomLevel] = React.useState(16);
 
   const refreshRoute = () => {
     navigationPost(`${hongKongCenter.lat}_${hongKongCenter.lng}`).then(
@@ -65,13 +67,13 @@ const MapScreen = () => {
       <View style={styles.container}>
         <MapboxGL.MapView style={styles.map}>
           <MapboxGL.Camera
-            zoomLevel={16}
+            zoomLevel={currentZoomLevel}
             centerCoordinate={currentLocation}
             animationMode={'flyTo'}
             animationDuration={10}
           />
           <MapboxGL.UserLocation
-            androidRenderMode="compass"
+            androidRenderMode="normal"
             animated={true}
             showsUserHeadingIndicator={true}
           />
@@ -89,6 +91,19 @@ const MapScreen = () => {
           activeOpacity={0.8}
           onPress={() => refreshRoute()}>
           <Text style={styles.buttonText}>Refresh Route</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.buttonRight}
+          activeOpacity={0.8}
+          onPress={() => {
+            setCurrentZoomLevel(16);
+            Geolocation.getCurrentPosition(info => {
+              setCurrentLocation([info.coords.longitude, info.coords.latitude]);
+
+              console.log(info, currentLocation, currentZoomLevel);
+            });
+          }}>
+          <Text style={styles.buttonText}>Recenter</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -125,12 +140,23 @@ const styles = StyleSheet.create({
   },
   button: {
     position: 'absolute',
-    marginHorizontal: 8,
-    width: '40%',
-    bottom: 32,
+    marginHorizontal: 5,
+    width: '45%',
+    bottom: 5,
     backgroundColor: '#3ead5c',
     padding: 10,
-    borderRadius: 20,
+    borderRadius: 18,
+    zIndex: 999,
+  },
+  buttonRight: {
+    position: 'absolute',
+    marginHorizontal: 5,
+    width: '45%',
+    bottom: 5,
+    right: 0,
+    backgroundColor: '#3ead5c',
+    padding: 10,
+    borderRadius: 18,
     zIndex: 999,
   },
   buttonText: {
