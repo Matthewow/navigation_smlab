@@ -1,10 +1,11 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {StyleSheet, Text, View, PermissionsAndroid} from 'react-native';
-import Mapbox from '@rnmapbox/maps';
+import Mapbox, {UserTrackingMode} from '@rnmapbox/maps';
 import MapboxGL from '@rnmapbox/maps';
 import {navigationPost} from './utils/http';
 import {TouchableOpacity} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
+import {Camera} from '@rnmapbox/maps';
 
 async function requestLocationPermission() {
   try {
@@ -42,9 +43,23 @@ const MapScreen = () => {
   ]);
   const [currentZoomLevel, setCurrentZoomLevel] = React.useState(16);
 
+  const recenter = () => {
+    Geolocation.getCurrentPosition(info => {
+      setCurrentLocation([
+        info.coords.longitude + Math.random() * 0.001,
+        info.coords.latitude,
+      ]);
+      setCurrentZoomLevel(16);
+      console.log(info, currentLocation, currentZoomLevel);
+    });
+  };
+
   const refreshRoute = () => {
-    navigationPost(`${hongKongCenter.lat}_${hongKongCenter.lng}`).then(
+    navigationPost(`${currentLocation[1]}_${currentLocation[0]}`).then(
       newRoute => {
+        console.log('====================================');
+        console.log(newRoute);
+        console.log('====================================');
         setLineString({
           type: 'Feature',
           properties: {},
@@ -59,19 +74,27 @@ const MapScreen = () => {
 
   useEffect(() => {
     requestLocationPermission();
-    refreshRoute();
+    // refreshRoute();
   }, []);
 
   return (
     <View style={styles.page}>
       <View style={styles.container}>
-        <MapboxGL.MapView style={styles.map}>
-          <MapboxGL.Camera
-            zoomLevel={currentZoomLevel}
-            centerCoordinate={currentLocation}
-            animationMode={'flyTo'}
-            animationDuration={10}
-          />
+        <MapboxGL.MapView
+          logoEnabled={false}
+          compassEnabled={true}
+          style={styles.map}>
+          {currentLocation && currentZoomLevel ? (
+            <MapboxGL.Camera
+              zoomLevel={currentZoomLevel}
+              centerCoordinate={currentLocation}
+              animationMode={'flyTo'}
+              animationDuration={10}
+              followUserLocation={true}
+              followUserMode={UserTrackingMode.FollowWithCourse}
+            />
+          ) : null}
+
           <MapboxGL.UserLocation
             androidRenderMode="normal"
             animated={true}
@@ -95,14 +118,7 @@ const MapScreen = () => {
         <TouchableOpacity
           style={styles.buttonRight}
           activeOpacity={0.8}
-          onPress={() => {
-            setCurrentZoomLevel(16);
-            Geolocation.getCurrentPosition(info => {
-              setCurrentLocation([info.coords.longitude, info.coords.latitude]);
-
-              console.log(info, currentLocation, currentZoomLevel);
-            });
-          }}>
+          onPress={recenter}>
           <Text style={styles.buttonText}>Recenter</Text>
         </TouchableOpacity>
       </View>
@@ -140,9 +156,9 @@ const styles = StyleSheet.create({
   },
   button: {
     position: 'absolute',
-    marginHorizontal: 5,
+    marginHorizontal: 10,
     width: '45%',
-    bottom: 5,
+    bottom: 20,
     backgroundColor: '#3ead5c',
     padding: 10,
     borderRadius: 18,
